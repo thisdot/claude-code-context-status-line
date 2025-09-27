@@ -33,7 +33,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 {
   "statusLine": {
     "type": "command",
-    "command": "npx @thisdot/claude-code-context-status-line"
+    "command": "npx @this-dot/claude-code-context-status-line"
   }
 }
 ```
@@ -41,7 +41,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 **Verification:**
 ```bash
 # Test the installation
-echo '{"transcript_path":"/tmp/test.jsonl","model":{"display_name":"Test"}}' | npx @thisdot/claude-code-context-status-line
+echo '{"transcript_path":"/tmp/test.jsonl","model":{"display_name":"Test"}}' | npx @this-dot/claude-code-context-status-line
 # Expected output: Test (-)
 ```
 
@@ -79,7 +79,7 @@ chmod +x context-status.js
 2. Verify settings.json syntax with a JSON validator
 3. Test the script manually:
    ```bash
-   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | npx @thisdot/claude-code-context-status-line
+   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | npx @this-dot/claude-code-context-status-line
    ```
 
 **Node.js not found errors:**
