@@ -160,6 +160,6 @@ function safeParseInt(value) {
 // Export the main API
 export { main, getTotalTokens, getTranscriptPathAndModel, formatStatusLine };
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+// Always run main when this file is executed as a script
+// This works for both direct execution and npm bin symlinks
+main();
