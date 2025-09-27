@@ -65,13 +65,32 @@ The benchmark suite uses Node.js native `performance.now()` timing to validate:
 
 ## Security Considerations
 
-### Input Validation
-- JSON input parsing with error handling
-- Basic file path resolution
+### Threat Model
+This tool processes untrusted input (JSONL transcript files and JSON configuration) and must defend against:
+- **Path traversal attacks**: Attempts to access files outside intended directories
+- **Input sanitization failures**: Malformed JSON, Unicode attacks, null byte injection
+- **Resource exhaustion**: Memory/CPU DoS through large inputs
+- **Information disclosure**: Leaking sensitive data through error messages
 
-### Error Handling
-- No sensitive information exposed in error messages
-- Safe fallback output (`Context: -`) on all errors
+### Security Implementations
+
+#### Input Validation
+- **JSON parsing**: Comprehensive error handling with safe fallback values
+- **Path sanitization**: Strips control characters, detects traversal patterns
+- **Path restrictions**: Blocks access to system directories (`/etc/`, `/root/`, Windows system paths)
+- **Token validation**: Ensures numeric values are finite, non-negative integers
+- **Memory limits**: Large input protection with configurable thresholds
+
+#### Error Handling
+- **No sensitive information exposed**: Error messages sanitized
+- **Safe fallback output**: Always returns `- (-)` on any error
+- **Security logging**: Suspicious activity logged to stderr (not exposed to status line)
+- **Graceful degradation**: Never crashes, always provides safe output
+
+#### File System Security
+- **Read-only access**: No file modification capabilities
+- **Project directory restriction**: Path validation prevents directory traversal
+- **Sandboxed execution**: Designed for Claude Code's secure environment
 
 
 ## ESLint Configuration
@@ -85,18 +104,34 @@ Strict security-focused configuration includes:
 
 ## Integration Testing
 
+### Manual Testing
 ```bash
-# Test with Claude Code (manual)
+# Test with valid input
 echo '{"transcript_path":"/path/to/actual/transcript.jsonl"}' | node src/context-status.js
+# Expected: Model (tokens) or - (-)
 
-# Test security (should be blocked)
+# Test security - path traversal (should be blocked)
 echo '{"transcript_path":"../../../etc/passwd.jsonl"}' | node src/context-status.js
-# Expected: Context: 0 (with security logging to stderr)
+# Expected: - (-) with security logging to stderr
+
+# Test with Claude Code directly
+# 1. Configure status line in ~/.claude/settings.json
+# 2. Start conversation in Claude Code
+# 3. Verify status line shows token count
+```
+
+### Automated Security Testing
+```bash
+# Run comprehensive security test suite
+pnpm test -- --grep "Security Tests"
+
+# Run all tests including security
+pnpm run test:all
 ```
 
 ## Version Management
 
-- **Current version:** 2.0.0
+- **Current version:** 0.1.0
 - **Semantic versioning:** MAJOR.MINOR.PATCH
 - **Breaking changes:** Increment MAJOR
 - **New features:** Increment MINOR
@@ -147,10 +182,34 @@ When tests fail unexpectedly (especially when functions return 0 instead of expe
    # Remove debug logging after fix is confirmed
    ```
 
+## Missing Critical Sections
+
+### Deployment Guide
+- **NPM Publishing**: Use `pnpm run prepublishOnly` to validate before publishing
+- **Version Management**: Keep package.json and CLAUDE.md versions synchronized
+- **Distribution**: Primary distribution through npm, secondary through GitHub releases
+
+### Configuration Reference
+- **Claude Code Integration**: Status line configuration in `~/.claude/settings.json`
+- **Environment Variables**: None required (zero-configuration design)
+- **Runtime Options**: All configuration through Claude Code's stdin JSON format
+
+### API Documentation
+- **Main Functions**: `getTotalTokens()`, `getTranscriptPathAndModel()`, `formatStatusLine()`
+- **Input Format**: JSON object with `transcript_path` and optional `model.display_name`
+- **Output Format**: String suitable for Claude Code status line display
+- **Error Handling**: Always returns safe fallback string, never throws
+
+### Compatibility Matrix
+- **Node.js**: 18.x (minimum), 20.x (recommended), 22.x (tested)
+- **Claude Code**: All versions with status line support
+- **Operating Systems**: macOS, Linux, Windows (with Node.js)
+
 ## AI Assistant Notes
 
-- This is a security-hardened project - be cautious with file access and input validation
-- Performance is critical - the script runs frequently in Claude Code's status line
-- Native Node.js test runner provides zero-dependency testing with built-in ES module support
-- Always use pnpm, not npm, for package management
-- The main script must remain at root level for proper package.json bin configuration
+- **Security First**: This is a security-hardened project - be extremely cautious with file access and input validation
+- **Performance Critical**: The script runs frequently in Claude Code's status line - optimize for speed and memory efficiency
+- **Zero Dependencies**: Uses only Node.js built-in modules for security and reliability
+- **Package Management**: Always use pnpm, not npm, for this project
+- **Architecture**: Single-script design in `src/context-status.js` with comprehensive test coverage
+- **Testing Strategy**: Node.js native test runner with security-focused test cases

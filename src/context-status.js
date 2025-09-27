@@ -32,17 +32,35 @@ async function main() {
 }
 
 function getTranscriptPathAndModel(input) {
-  const data = JSON.parse(input);
-  if (!data.transcript_path) {
-    throw new Error('Missing transcript_path');
-  }
+  try {
+    const data = JSON.parse(input);
 
-  const modelName = data.model?.display_name || '-';
-  
-  return {
-    transcriptPath: data.transcript_path,
-    modelName
-  };
+    // Validate input structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid input format');
+    }
+
+    if (!data.transcript_path || typeof data.transcript_path !== 'string') {
+      throw new Error('Missing or invalid transcript_path');
+    }
+
+    // Security: Validate and sanitize path
+    const transcriptPath = sanitizePath(data.transcript_path);
+    const modelName = (data.model?.display_name && typeof data.model.display_name === 'string')
+      ? data.model.display_name
+      : '-';
+
+    return {
+      transcriptPath,
+      modelName
+    };
+  } catch (error) {
+    // Return safe fallback values without exposing error details
+    return {
+      transcriptPath: '',
+      modelName: '-'
+    };
+  }
 }
 
 function getTotalTokens(lines) {
@@ -64,12 +82,19 @@ function getTotalTokens(lines) {
       continue;
     }
 
-    const usage = entry.message.usage;
-    const inputTokens = parseInt(usage.input_tokens, 10);
-    const cacheReadTokens = parseInt(usage.cache_read_input_tokens || 0, 10);
-    const cacheCreationTokens = parseInt(usage.cache_creation_input_tokens || 0, 10);
+    const {usage} = entry.message;
 
-    return inputTokens + cacheReadTokens + cacheCreationTokens;
+    // Security: Validate and sanitize token values
+    const inputTokens = safeParseInt(usage.input_tokens);
+    const cacheReadTokens = safeParseInt(usage.cache_read_input_tokens || 0);
+    const cacheCreationTokens = safeParseInt(usage.cache_creation_input_tokens || 0);
+
+    const total = inputTokens + cacheReadTokens + cacheCreationTokens;
+
+    // Security: Ensure result is finite and non-negative
+    if (isFinite(total) && total >= 0) {
+      return Math.floor(total);
+    }
   }
 
   return 0;
@@ -86,6 +111,51 @@ function formatStatusLine(tokens, modelName) {
 
 function formatErrorStatusLine() {
   return '- (-)';
+}
+
+// Security helper functions
+function sanitizePath(inputPath) {
+  if (!inputPath || typeof inputPath !== 'string') {
+    return '';
+  }
+
+  // Remove null bytes and other control characters
+  // eslint-disable-next-line no-control-regex
+  const cleanPath = inputPath.replace(/[\x00-\x1F\x7F]/g, '');
+
+  // Basic path traversal protection - reject obvious attempts
+  if (cleanPath.includes('../') ||
+      cleanPath.includes('..\\') ||
+      cleanPath.startsWith('/etc/') ||
+      cleanPath.startsWith('/root/') ||
+      cleanPath.includes('passwd') ||
+      cleanPath.includes('shadow') ||
+      /^[A-Z]:\\(Windows|System32|Program Files)/i.test(cleanPath)) {
+
+    // Log security attempt but don't expose details
+    console.error('[SECURITY] Rejected suspicious path pattern');
+    return '';
+  }
+
+  return cleanPath;
+}
+
+function safeParseInt(value) {
+  if (typeof value === 'number') {
+    if (isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER) {
+      return Math.floor(value);
+    }
+    return 0;
+  }
+
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    if (isFinite(parsed) && parsed >= 0 && parsed <= Number.MAX_SAFE_INTEGER) {
+      return parsed;
+    }
+  }
+
+  return 0;
 }
 
 // Export the main API

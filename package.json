@@ -1,14 +1,17 @@
 {
   "name": "@thisdot/claude-code-context-status-line",
   "version": "0.1.0",
-  "description": "Restore context visibility for AWS Bedrock users in Claude Code",
+  "description": "CLI tool to restore context window visibility for AWS Bedrock users in Claude Code by displaying real-time token usage in the status line",
   "type": "module",
   "main": "src/context-status.js",
   "bin": {
     "claude-code-context-status-line": "src/context-status.js"
   },
   "files": [
-    "src/"
+    "src/",
+    "README.md",
+    "LICENSE",
+    "docs/claude-code-status-line.md"
   ],
   "scripts": {
     "test": "node --test tests/context-status.test.js",
@@ -17,20 +20,30 @@
     "test:all": "node --test tests/*.test.js",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
-    "prepublishOnly": "pnpm run lint && pnpm run test"
+    "prepublishOnly": "pnpm run lint && pnpm run test",
+    "prepack": "pnpm run lint && pnpm run test",
+    "version": "pnpm run test:all && git add -A src",
+    "postversion": "git push && git push --tags",
+    "prepare": "node -e \"try{require('./src/context-status.js')}catch(e){process.exit(1)}\"",
+    "check-types": "node --check src/context-status.js"
   },
   "keywords": [
     "claude-code",
     "aws-bedrock",
     "context",
-    "status-line"
+    "status-line",
+    "cli",
+    "anthropic",
+    "token-usage",
+    "developer-tools"
   ],
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "eslint-plugin-security": "^3.0.1"
   },
   "repository": {
     "type": "git",
@@ -40,5 +53,22 @@
   "bugs": {
     "url": "https://github.com/thisdot/claude-code-context-status-line/issues"
   },
-  "homepage": "https://github.com/thisdot/claude-code-context-status-line#readme"
+  "homepage": "https://github.com/thisdot/claude-code-context-status-line#readme",
+  "exports": {
+    ".": "./src/context-status.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/thisdot"
+  },
+  "volta": {
+    "node": "18.0.0",
+    "pnpm": "8.0.0"
+  }
 }

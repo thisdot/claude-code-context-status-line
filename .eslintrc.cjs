@@ -6,12 +6,16 @@ module.exports = {
   extends: [
     'eslint:recommended'
   ],
+  plugins: [
+    'security'
+  ],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module'
   },
   rules: {
-    // Security-focused rules (manual configuration for better control)
+    // === SECURITY CRITICAL ===
+    // Dangerous code prevention
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
@@ -19,6 +23,31 @@ module.exports = {
     'no-proto': 'error',
     'no-iterator': 'error',
     'no-with': 'error',
+    'no-global-assign': 'error',
+    'no-obj-calls': 'error',
+    'no-unsafe-negation': 'error',
+    'no-unsafe-optional-chaining': 'error',
+    'no-loss-of-precision': 'error',
+    'no-unreachable': 'error',
+    'no-constant-condition': 'error',
+
+    // Security plugin rules (commented out until plugin compatibility resolved)
+    // 'security/detect-buffer-noassert': 'error',
+    // 'security/detect-child-process': 'warn',
+    // 'security/detect-disable-mustache-escape': 'error',
+    // 'security/detect-eval-with-expression': 'error',
+    // 'security/detect-new-buffer': 'error',
+    // 'security/detect-non-literal-regexp': 'warn',
+    // 'security/detect-object-injection': 'warn',
+    // 'security/detect-possible-timing-attacks': 'warn',
+    // 'security/detect-pseudoRandomBytes': 'error',
+
+    // JSON processing security
+    'no-prototype-builtins': 'error',
+    'no-empty-character-class': 'error',
+
+    // Node.js specific security
+    'no-new-require': 'error',
 
     // Prevent common vulnerabilities
     'no-console': ['warn', { allow: ['error', 'warn'] }],
@@ -76,7 +105,27 @@ module.exports = {
     'wrap-iife': 'error',
     'yoda': 'error',
 
-    // Code style - minimal but important
+    // === PERFORMANCE ===
+    'prefer-spread': 'error',
+    'prefer-template': 'error',
+    'prefer-object-spread': 'error',
+
+    // === MODERN JAVASCRIPT ===
+    'prefer-rest-params': 'error',
+    'prefer-destructuring': ['error', { object: true, array: false }],
+    'prefer-arrow-callback': 'error',
+    'prefer-object-has-own': 'error',
+    'prefer-numeric-literals': 'error',
+    'logical-assignment-operators': 'error',
+    'no-promise-executor-return': 'error',
+
+    // === CLI-SPECIFIC ===
+    // Input/Output consistency
+    'eol-last': 'error',
+    'no-trailing-spaces': 'error',
+    'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
+
+    // === STYLE ===
     'indent': ['error', 2, { SwitchCase: 1 }],
     'quotes': ['error', 'single', { avoidEscape: true }],
     'semi': ['error', 'always'],
@@ -91,8 +140,9 @@ module.exports = {
     // Import/Export
     'no-duplicate-imports': 'error',
 
-    // Node.js specific security
+    // === NODE.JS SPECIFIC ===
     'no-process-exit': 'warn',
+    'no-process-env': 'warn', // Flag for security review
     'no-sync': 'warn'
   },
   overrides: [
@@ -102,7 +152,9 @@ module.exports = {
       rules: {
         'no-console': 'off',
         'max-len': 'off',
-        'no-sync': 'off'
+        'no-sync': 'off',
+        'security/detect-non-literal-regexp': 'off',
+        'security/detect-object-injection': 'off'
       }
     }
   ]
