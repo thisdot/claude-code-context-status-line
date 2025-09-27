@@ -131,7 +131,6 @@ pnpm run test:all
 
 ## Version Management
 
-- **Current version:** 0.1.0
 - **Semantic versioning:** MAJOR.MINOR.PATCH
 - **Breaking changes:** Increment MAJOR
 - **New features:** Increment MINOR

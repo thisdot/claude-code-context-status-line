@@ -7,7 +7,6 @@
  * context window usage as "Context: 125k" in Claude Code's status line.
  *
  * @see https://github.com/thisdot/claude-code-context-status-line for installation and usage
- * @version 0.1.0
  * @license MIT
  */
 
