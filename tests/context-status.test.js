@@ -166,11 +166,11 @@ describe('Integration Tests', () => {
       const execAsyncPromise = promisify(exec);
 
       try {
-        // Check if Claude Code CLI is available
+        // Check if Claude Code is available
         try {
           await execAsyncPromise('which claude', { timeout: 5000 });
         } catch (error) {
-          console.warn('Claude Code CLI not found, skipping integration test');
+          console.warn('Claude Code not found, skipping integration test');
           return;
         }
 

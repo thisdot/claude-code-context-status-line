@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * Claude Code Context Usage Status Line Script
  *

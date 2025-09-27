@@ -11,7 +11,7 @@
 ## Project Structure
 
 **Key files:**
-- `src/context-status.js` - Main executable script
+- `src/context-status.js` - Main status line script
 - `tests/` - Native Node.js test suite (functionality, security, benchmarks)
 - `package.json` - Uses pnpm (not npm)
 - `.eslintrc.cjs` - Security-focused linting rules
@@ -141,8 +141,7 @@ pnpm run test:all
 
 1. **Node.js version:** Ensure using Node.js 18+ for native test runner support
 2. **pnpm not found:** Install with `npm install -g pnpm`
-3. **Permission errors:** Ensure `src/context-status.js` is executable (`chmod +x`)
-4. **Path issues:** Use absolute paths in Claude Code configuration
+3. **Path issues:** Use absolute paths in Claude Code configuration
 
 ## Contributing Guidelines
 

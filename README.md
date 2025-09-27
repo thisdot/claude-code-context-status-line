@@ -25,7 +25,13 @@ Custom Claude Code status line to restore context window visibility for AWS Bedr
 **Choose Method 1 if:** You want automatic updates and minimal maintenance
 **Choose Method 2 if:** You need offline access or want to modify the script
 
-### Method 1: NPX (Recommended)
+### Method 1: Direct Node.js (Recommended)
+
+Install the package and reference it directly:
+
+```bash
+npm install @thisdot/claude-code-context-status-line
+```
 
 Add this to your Claude Code settings (`~/.claude/settings.json`):
 
@@ -33,7 +39,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 {
   "statusLine": {
     "type": "command",
-    "command": "npx @thisdot/claude-code-context-status-line"
+    "command": "node ./node_modules/@thisdot/claude-code-context-status-line/src/context-status.js"
   }
 }
 ```
@@ -77,11 +83,10 @@ chmod +x context-status.js
 **Status line shows "- (-)" constantly:**
 1. Check Claude Code version: `claude --version`
 2. Verify settings.json syntax with a JSON validator
-3. Test the command manually:
+3. Test the script manually:
    ```bash
-   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | node context-status.js
+   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | node ./node_modules/@thisdot/claude-code-context-status-line/src/context-status.js
    ```
-4. Check file permissions on the script
 
 **Node.js not found errors:**
 - Ensure Node.js 18+ is installed: `node --version`
@@ -89,7 +94,6 @@ chmod +x context-status.js
 - On macOS: Try `brew install node` if using Homebrew
 
 **Permission denied errors:**
-- Make script executable: `chmod +x context-status.js`
 - Check Claude Code has access to the script location
 - Use absolute paths in Claude Code configuration
 

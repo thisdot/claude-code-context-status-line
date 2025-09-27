@@ -119,7 +119,7 @@ module.exports = {
     'logical-assignment-operators': 'error',
     'no-promise-executor-return': 'error',
 
-    // === CLI-SPECIFIC ===
+    // === NODE.JS SCRIPT ===
     // Input/Output consistency
     'eol-last': 'error',
     'no-trailing-spaces': 'error',
