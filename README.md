@@ -25,13 +25,7 @@ Custom Claude Code status line to restore context window visibility for AWS Bedr
 **Choose Method 1 if:** You want automatic updates and minimal maintenance
 **Choose Method 2 if:** You need offline access or want to modify the script
 
-### Method 1: Global Install (Recommended)
-
-Install globally and use the command directly:
-
-```bash
-npm install -g @this-dot/claude-code-context-status-line
-```
+### Method 1: NPX (Recommended)
 
 Add this to your Claude Code settings (`~/.claude/settings.json`):
 
@@ -39,7 +33,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 {
   "statusLine": {
     "type": "command",
-    "command": "claude-code-context-status-line"
+    "command": "npx -p @this-dot/claude-code-context-status-line ccstatus"
   }
 }
 ```
@@ -47,7 +41,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 **Verification:**
 ```bash
 # Test the installation
-echo '{"transcript_path":"/tmp/test.jsonl","model":{"display_name":"Test"}}' | claude-code-context-status-line
+echo '{"transcript_path":"/tmp/test.jsonl","model":{"display_name":"Test"}}' | npx -p @this-dot/claude-code-context-status-line ccstatus
 # Expected output: Test (-)
 ```
 
@@ -85,7 +79,7 @@ chmod +x context-status.js
 2. Verify settings.json syntax with a JSON validator
 3. Test the script manually:
    ```bash
-   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | claude-code-context-status-line
+   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | npx -p @this-dot/claude-code-context-status-line ccstatus
    ```
 
 **Node.js not found errors:**
