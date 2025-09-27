@@ -1,10 +1,10 @@
 {
   "name": "@this-dot/claude-code-context-status-line",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Custom Claude Code status line to restore context window visibility for AWS Bedrock users by displaying token usage.",
   "type": "module",
   "main": "src/context-status.js",
-  "bin": "src/context-status.js",
+  "bin": "./src/context-status.js",
   "files": [
     "src/",
     "README.md",

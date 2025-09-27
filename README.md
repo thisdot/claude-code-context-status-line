@@ -33,7 +33,7 @@ Add this to your Claude Code settings (`~/.claude/settings.json`):
 {
   "statusLine": {
     "type": "command",
-    "command": "npx @this-dot/claude-code-context-status-line"
+    "command": "npx -y @this-dot/claude-code-context-status-line"
   }
 }
 ```
@@ -79,7 +79,7 @@ chmod +x context-status.js
 2. Verify settings.json syntax with a JSON validator
 3. Test the script manually:
    ```bash
-   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | npx @this-dot/claude-code-context-status-line
+   echo '{"transcript_path":"/path/to/transcript.jsonl"}' | npx -p @this-dot/claude-code-context-status-line claude-code-context-status-line
    ```
 
 **Node.js not found errors:**
