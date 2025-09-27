@@ -1,5 +1,5 @@
 {
-  "name": "@thisdot/claude-code-context-status-line",
+  "name": "@this-dot/claude-code-context-status-line",
   "version": "0.1.0",
   "description": "CLI tool to restore context window visibility for AWS Bedrock users in Claude Code by displaying real-time token usage in the status line",
   "type": "module",
@@ -10,8 +10,7 @@
   "files": [
     "src/",
     "README.md",
-    "LICENSE",
-    "docs/claude-code-status-line.md"
+    "LICENSE"
   ],
   "scripts": {
     "test": "node --test tests/context-status.test.js",
@@ -21,10 +20,6 @@
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "prepublishOnly": "pnpm run lint && pnpm run test",
-    "prepack": "pnpm run lint && pnpm run test",
-    "version": "pnpm run test:all && git add -A src",
-    "postversion": "git push && git push --tags",
-    "prepare": "node -e \"try{require('./src/context-status.js')}catch(e){process.exit(1)}\"",
     "check-types": "node --check src/context-status.js"
   },
   "keywords": [
@@ -32,7 +27,6 @@
     "aws-bedrock",
     "context",
     "status-line",
-    "cli",
     "anthropic",
     "token-usage",
     "developer-tools"
@@ -62,13 +56,5 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/",
     "provenance": true
-  },
-  "funding": {
-    "type": "individual",
-    "url": "https://github.com/sponsors/thisdot"
-  },
-  "volta": {
-    "node": "18.0.0",
-    "pnpm": "8.0.0"
   }
 }
