@@ -1,4 +1,6 @@
-import Benchmark from 'benchmark';
+import { test, describe } from 'node:test';
+import assert from 'node:assert';
+import { performance } from 'node:perf_hooks';
 import { getTotalTokens, formatStatusLine } from '../src/context-status.js';
 
 describe('Performance Benchmarks', () => {
@@ -20,83 +22,73 @@ describe('Performance Benchmarks', () => {
     return lines;
   }
 
+  // Helper to measure performance
+  function measurePerformance(fn, iterations = 100) {
+    const start = performance.now();
+    for (let i = 0; i < iterations; i++) {
+      fn();
+    }
+    const end = performance.now();
+    const totalTime = end - start;
+    const averageTime = totalTime / iterations;
+    const operationsPerSecond = 1000 / averageTime;
+
+    return {
+      totalTime,
+      averageTime,
+      operationsPerSecond
+    };
+  }
+
   describe('Token Processing Performance', () => {
-    test('getTotalTokens should handle small datasets efficiently', (done) => {
+    test('getTotalTokens should handle small datasets efficiently', () => {
       const smallLines = createTestLines(50);
-      const suite = new Benchmark.Suite();
 
-      suite
-        .add('getTotalTokens - small dataset (50 entries)', () => {
-          getTotalTokens(smallLines);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(10); // Should process >10 times per second
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      const results = measurePerformance(() => {
+        getTotalTokens(smallLines);
+      }, 50);
+
+      console.log(`Small dataset: ${results.operationsPerSecond.toFixed(2)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 10, `Should process >10 times per second, got ${results.operationsPerSecond.toFixed(2)}`);
     });
 
-    test('getTotalTokens should handle medium datasets efficiently', (done) => {
+    test('getTotalTokens should handle medium datasets efficiently', () => {
       const mediumLines = createTestLines(1000);
-      const suite = new Benchmark.Suite();
 
-      suite
-        .add('getTotalTokens - medium dataset (1000 entries)', () => {
-          getTotalTokens(mediumLines);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(5); // Should process >5 times per second
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      const results = measurePerformance(() => {
+        getTotalTokens(mediumLines);
+      }, 20);
+
+      console.log(`Medium dataset: ${results.operationsPerSecond.toFixed(2)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 5, `Should process >5 times per second, got ${results.operationsPerSecond.toFixed(2)}`);
     });
 
-    test('getTotalTokens should handle large datasets efficiently', (done) => {
+    test('getTotalTokens should handle large datasets efficiently', () => {
       const largeLines = createTestLines(10000);
-      const suite = new Benchmark.Suite();
 
-      suite
-        .add('getTotalTokens - large dataset (10000 entries)', () => {
-          getTotalTokens(largeLines);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(1); // Should process >1 time per second
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      const results = measurePerformance(() => {
+        getTotalTokens(largeLines);
+      }, 5);
+
+      console.log(`Large dataset: ${results.operationsPerSecond.toFixed(2)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 1, `Should process >1 time per second, got ${results.operationsPerSecond.toFixed(2)}`);
     });
   });
 
   describe('Formatting Performance', () => {
-    test('formatStatusLine should be fast for various token counts', (done) => {
+    test('formatStatusLine should be fast for various token counts', () => {
       const tokenCounts = [0, 500, 1000, 1500, 125000, 125400, 1000000, 1500000];
       let index = 0;
 
-      const suite = new Benchmark.Suite();
+      const results = measurePerformance(() => {
+        const tokens = tokenCounts[index % tokenCounts.length];
+        const modelName = 'TestModel';
+        index++;
+        formatStatusLine(tokens, modelName);
+      }, 10000);
 
-      suite
-        .add('formatStatusLine performance', () => {
-          const tokens = tokenCounts[index % tokenCounts.length];
-          index++;
-          formatStatusLine(tokens);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(50000); // Should format >50k times per second
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      console.log(`Format performance: ${results.operationsPerSecond.toFixed(0)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 50000, `Should format >50k times per second, got ${results.operationsPerSecond.toFixed(0)}`);
     });
   });
 
@@ -108,19 +100,26 @@ describe('Performance Benchmarks', () => {
       // Process multiple times to test for memory leaks
       for (let i = 0; i < 100; i++) {
         getTotalTokens(testLines);
-        formatStatusLine(1000 + i);
+        formatStatusLine(1000 + i, 'TestModel');
+      }
+
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
       }
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryGrowth = finalMemory - initialMemory;
 
+      console.log(`Memory growth: ${(memoryGrowth / (1024 * 1024)).toFixed(2)} MB`);
+
       // Should not grow more than 10MB during processing
-      expect(memoryGrowth).toBeLessThan(10 * 1024 * 1024);
+      assert.ok(memoryGrowth < 10 * 1024 * 1024, `Memory growth should be <10MB, was ${(memoryGrowth / (1024 * 1024)).toFixed(2)}MB`);
     });
   });
 
   describe('Edge Case Performance', () => {
-    test('should handle malformed JSON efficiently', (done) => {
+    test('should handle malformed JSON efficiently', () => {
       const mixedLines = [
         ...createTestLines(100),
         'invalid json line 1',
@@ -131,39 +130,23 @@ describe('Performance Benchmarks', () => {
         ...createTestLines(100)
       ];
 
-      const suite = new Benchmark.Suite();
+      const results = measurePerformance(() => {
+        getTotalTokens(mixedLines);
+      }, 20);
 
-      suite
-        .add('getTotalTokens with malformed data', () => {
-          getTotalTokens(mixedLines);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(5); // Should still be reasonably fast
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      console.log(`Malformed JSON performance: ${results.operationsPerSecond.toFixed(2)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 5, `Should still be reasonably fast, got ${results.operationsPerSecond.toFixed(2)} ops/sec`);
     });
 
-    test('should handle empty and whitespace lines efficiently', (done) => {
+    test('should handle empty and whitespace lines efficiently', () => {
       const emptyLines = ['', '   ', '\t\n', '  \n  ', ...createTestLines(100)];
 
-      const suite = new Benchmark.Suite();
+      const results = measurePerformance(() => {
+        getTotalTokens(emptyLines);
+      }, 50);
 
-      suite
-        .add('getTotalTokens with empty lines', () => {
-          getTotalTokens(emptyLines);
-        })
-        .on('cycle', (event) => {
-          const benchmark = event.target;
-          expect(benchmark.hz).toBeGreaterThan(10);
-        })
-        .on('complete', () => {
-          done();
-        })
-        .run();
+      console.log(`Empty lines performance: ${results.operationsPerSecond.toFixed(2)} ops/sec`);
+      assert.ok(results.operationsPerSecond > 10, `Should handle empty lines efficiently, got ${results.operationsPerSecond.toFixed(2)} ops/sec`);
     });
   });
 });

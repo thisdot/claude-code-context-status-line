@@ -12,9 +12,10 @@
 
 **Key files:**
 - `src/context-status.js` - Main executable script
-- `tests/` - Jest test suite (functionality, security, benchmarks)
+- `tests/` - Native Node.js test suite (functionality, security, benchmarks)
 - `package.json` - Uses pnpm (not npm)
 - `.eslintrc.cjs` - Security-focused linting rules
+- `docs/claude-code-status-line.md` - Claude Code integration documentation
 
 ## Key Design Decisions
 
@@ -25,12 +26,12 @@
 - Simple src/ structure for better organization
 
 ### 2. Testing Strategy
-- **Jest with ES modules** support (`node --experimental-vm-modules`)
+- **Node.js native test runner** (stable since Node.js 20)
 - **Three test categories:**
   - Functionality tests (core features)
-  - Security tests (path traversal, validation, etc.)
-  - Performance benchmarks (using `benchmark` library)
-- **Coverage targets:** 70% for branches, functions, lines, statements
+  - Security tests (Claude Code integration validation)
+  - Performance benchmarks (using built-in performance timing)
+- **Built-in coverage** with `--experimental-test-coverage` flag
 
 ### 3. Performance Features
 - **Clean formatting:** Consistent token display across all environments
@@ -43,20 +44,24 @@
 pnpm install
 
 # Development workflow
-pnpm test                    # Run all tests
-pnpm run test:coverage      # Generate coverage report
+pnpm test                    # Run core functionality tests
+pnpm run test:coverage      # Generate coverage report with native coverage
+pnpm run benchmark         # Run performance benchmarks
+pnpm run test:all          # Run all tests (functionality + benchmarks)
 pnpm run lint               # Check code quality and security
 pnpm run lint:fix          # Auto-fix linting issues
-pnpm run benchmark         # Run performance tests
 ```
 
 ## Performance Targets
 
-The benchmark suite validates basic performance expectations:
+The benchmark suite uses Node.js native `performance.now()` timing to validate:
 
-- **Token formatting:** Efficient number formatting with Intl.NumberFormat
-- **File processing:** Quick parsing of JSONL transcript files
-- **Memory usage:** Minimal memory footprint for status line display
+- **Small datasets (50 entries):** >10 operations/second
+- **Medium datasets (1,000 entries):** >5 operations/second
+- **Large datasets (10,000 entries):** >1 operation/second
+- **Format performance:** >50,000 operations/second
+- **Memory usage:** <10MB growth during processing
+- **Edge cases:** Efficient handling of malformed JSON and empty lines
 
 ## Security Considerations
 
@@ -99,7 +104,7 @@ echo '{"transcript_path":"../../../etc/passwd.jsonl"}' | node src/context-status
 
 ## Common Issues
 
-1. **ES Module errors:** Ensure using `node --experimental-vm-modules` for Jest
+1. **Node.js version:** Ensure using Node.js 18+ for native test runner support
 2. **pnpm not found:** Install with `npm install -g pnpm`
 3. **Permission errors:** Ensure `src/context-status.js` is executable (`chmod +x`)
 4. **Path issues:** Use absolute paths in Claude Code configuration
@@ -130,15 +135,15 @@ When tests fail unexpectedly (especially when functions return 0 instead of expe
    - **File content**: Log actual file contents vs expected format during debugging
 
 3. **Isolation Testing:**
-   - Create minimal reproduction scripts outside Jest environment
+   - Create minimal reproduction scripts outside test environment
    - Test core functions with known-good inputs to verify baseline functionality
-   - Use single-test execution: `--testNamePattern="specific test name"`
+   - Use single-test execution: `node --test --grep "specific test name"`
 
 4. **Example Debug Session:**
    ```bash
    # Add debug logging to problematic function
    # Run isolated test to see exact failure point
-   node --experimental-vm-modules node_modules/jest/bin/jest.js --testNamePattern="failing test"
+   node --test tests/context-status.test.js
    # Remove debug logging after fix is confirmed
    ```
 
@@ -146,6 +151,6 @@ When tests fail unexpectedly (especially when functions return 0 instead of expe
 
 - This is a security-hardened project - be cautious with file access and input validation
 - Performance is critical - the script runs frequently in Claude Code's status line
-- ES modules with Jest require the `--experimental-vm-modules` flag
+- Native Node.js test runner provides zero-dependency testing with built-in ES module support
 - Always use pnpm, not npm, for package management
 - The main script must remain at root level for proper package.json bin configuration

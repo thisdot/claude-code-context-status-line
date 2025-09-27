@@ -18,24 +18,31 @@ import path from 'path';
 
 async function main() {
   try {
-    const transcriptPath = getTranscriptPath(await text(process.stdin));
+    const inputData = await text(process.stdin);
+    const { transcriptPath, modelName } = getTranscriptPathAndModel(inputData);
     const filePath = path.resolve(transcriptPath);
 
     const transcriptContent = await readFile(filePath, 'utf8');
 
     const tokens = getTotalTokens(transcriptContent.split('\n'));
-    process.stdout.write(formatStatusLine(tokens));
-  } catch (error) {
+    process.stdout.write(formatStatusLine(tokens, modelName));
+  } catch {
     process.stdout.write(formatErrorStatusLine());
   }
 }
 
-function getTranscriptPath(input) {
-  const { transcript_path } = JSON.parse(input);
-  if (!transcript_path) {
+function getTranscriptPathAndModel(input) {
+  const data = JSON.parse(input);
+  if (!data.transcript_path) {
     throw new Error('Missing transcript_path');
   }
-  return transcript_path;
+
+  const modelName = data.model?.display_name || '-';
+  
+  return {
+    transcriptPath: data.transcript_path,
+    modelName
+  };
 }
 
 function getTotalTokens(lines) {
@@ -68,21 +75,21 @@ function getTotalTokens(lines) {
   return 0;
 }
 
-function formatStatusLine(tokens) {
+function formatStatusLine(tokens, modelName) {
   const formatted = new Intl.NumberFormat('en', {
     notation: 'compact',
     maximumFractionDigits: 1
   }).format(tokens);
 
-  return `Context: ${formatted}`;
+  return `${modelName} (${formatted})`;
 }
 
 function formatErrorStatusLine() {
-  return 'Context: -';
+  return '- (-)';
 }
 
 // Export the main API
-export { main, getTotalTokens, getTranscriptPath, formatStatusLine };
+export { main, getTotalTokens, getTranscriptPathAndModel, formatStatusLine };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main();

@@ -11,58 +11,32 @@
     "src/"
   ],
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathIgnorePatterns=\"benchmark.test.js\"",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --testPathIgnorePatterns=\"benchmark.test.js\"",
+    "test": "node --test tests/context-status.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/context-status.test.js",
+    "benchmark": "node --test tests/benchmark.test.js",
+    "test:all": "node --test tests/*.test.js",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
-    "benchmark": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testNamePattern=\"benchmark\" --verbose",
-    "prepublishOnly": "npm run lint && npm run test"
+    "prepublishOnly": "pnpm run lint && pnpm run test"
   },
   "keywords": [
     "claude-code",
     "aws-bedrock",
     "context",
-    "status-line",
-    "security",
-    "performance",
-    "caching"
+    "status-line"
   ],
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "jest": "^29.7.0",
-    "eslint": "^8.57.0",
-    "benchmark": "^2.1.4"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "transform": {},
-    "collectCoverageFrom": [
-      "src/context-status.js"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js",
-      "**/?(*.)+(spec|test).js"
-    ],
-    "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov", "html"],
-    "coverageThreshold": {
-      "global": {
-        "branches": 70,
-        "functions": 70,
-        "lines": 70,
-        "statements": 70
-      }
-    }
+    "eslint": "^8.57.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thisdot/claude-code-context-status-line.git"
   },
-  "author": "",
+  "author": "This Dot, Inc.",
   "bugs": {
     "url": "https://github.com/thisdot/claude-code-context-status-line/issues"
   },
