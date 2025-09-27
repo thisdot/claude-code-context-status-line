@@ -1,6 +1,6 @@
 # Claude Code Context Status Line for AWS Bedrock Users
 
-A secure, high-performance CLI tool to restore context window visibility for AWS Bedrock users in Claude Code by displaying real-time token usage in the status line. **Specifically designed for AWS Bedrock users who have lost access to the `/context` command** in Claude Code and need to restore visibility into their context window usage.
+Custom Claude Code status line to restore context window visibility for AWS Bedrock users by displaying token usage. **Specifically designed for AWS Bedrock users who have lost access to the `/context` command** in Claude Code and need to restore visibility into their context window usage.
 
 ## What It Does
 
@@ -70,12 +70,6 @@ chmod +x context-status.js
 - **Linux**: `~/.claude/settings.json`
 - **Windows**: `%USERPROFILE%\.claude\settings.json`
 
-**If settings file doesn't exist:** Create the directory and file:
-```bash
-mkdir -p ~/.claude
-echo '{"statusLine":{"type":"command","command":"npx @thisdot/claude-code-context-status-line"}}' > ~/.claude/settings.json
-```
-
 ## Troubleshooting
 
 ### Common Issues
@@ -104,19 +98,8 @@ echo '{"statusLine":{"type":"command","command":"npx @thisdot/claude-code-contex
 - Verify your conversation is generating token usage data
 - Check that transcript files are being created in the expected location
 
-### Debug Mode
-Add logging by temporarily modifying the script to output debug info:
-```javascript
-console.error('[DEBUG] Input:', inputData);
-```
-
 ### Getting Help
 1. Check the [Issues page](https://github.com/thisdot/claude-code-context-status-line/issues) for similar problems
-2. When reporting bugs, include:
-   - Node.js version (`node --version`)
-   - Claude Code version (`claude --version`)
-   - Operating system
-   - Complete error message
 
 ## Security & Privacy
 
@@ -185,18 +168,6 @@ console.error('[DEBUG] Input:', inputData);
 - Updates when Claude Code processes new messages
 - Shows cumulative token count for entire conversation
 - Reflects the most recent conversation state
-
-## Contributing
-
-See our [Contributing Guidelines](CLAUDE.md) for development setup, testing requirements, and security considerations.
-
-**Quick development setup:**
-```bash
-git clone https://github.com/thisdot/claude-code-context-status-line
-cd claude-code-context-status-line
-pnpm install  # Note: uses pnpm, not npm
-pnpm test     # Run tests
-```
 
 ## License
 
