@@ -43,7 +43,6 @@ function getTranscriptPathAndModel(input) {
       throw new Error('Missing or invalid transcript_path');
     }
 
-    // Security: Validate and sanitize path
     const transcriptPath = data.transcript_path;
     const modelName = (data.model?.display_name && typeof data.model.display_name === 'string')
       ? data.model.display_name
@@ -83,17 +82,12 @@ function getTotalTokens(lines) {
 
     const {usage} = entry.message;
 
-    // Security: Validate and sanitize token values
-    const inputTokens = parseInt(usage.input_tokens);
-    const cacheReadTokens = parseInt(usage.cache_read_input_tokens || 0);
-    const cacheCreationTokens = parseInt(usage.cache_creation_input_tokens || 0);
+    const inputTokens = parseInt(usage.input_tokens, 10) || 0;
+    const cacheReadTokens = parseInt(usage.cache_read_input_tokens || 0, 10) || 0;
+    const cacheCreationTokens = parseInt(usage.cache_creation_input_tokens || 0, 10) || 0;
 
     const total = inputTokens + cacheReadTokens + cacheCreationTokens;
-
-    // Security: Ensure result is finite and non-negative
-    if (isFinite(total) && total >= 0) {
-      return Math.floor(total);
-    }
+    return total;
   }
 
   return 0;
@@ -111,6 +105,7 @@ function formatStatusLine(tokens, modelName) {
 function formatErrorStatusLine() {
   return '- (-)';
 }
+
 
 // Export the main API
 export { main, getTotalTokens, getTranscriptPathAndModel, formatStatusLine };
