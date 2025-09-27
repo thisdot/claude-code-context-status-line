@@ -1,0 +1,8 @@
+node_modules/
+*.min.js
+coverage/
+dist/
+scripts/build.js
+scripts/test*.js
+scripts/lint.js
+scripts/benchmark.js

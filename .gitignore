@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Test artifacts and reports
+coverage/
+test-results/
+.nyc_output/
+junit.xml
+
+# Test files generated during test runs
+*.jsonl
+
+# Lock files (keep only pnpm-lock.yaml)
+package-lock.json
+yarn.lock
+
+# IDE/Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+settings.local.json
+
+# System Files
+.DS_Store
+
+# Logs
+*.log
