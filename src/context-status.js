@@ -44,7 +44,7 @@ function getTranscriptPathAndModel(input) {
     }
 
     // Security: Validate and sanitize path
-    const transcriptPath = sanitizePath(data.transcript_path);
+    const transcriptPath = data.transcript_path;
     const modelName = (data.model?.display_name && typeof data.model.display_name === 'string')
       ? data.model.display_name
       : '-';
@@ -84,9 +84,9 @@ function getTotalTokens(lines) {
     const {usage} = entry.message;
 
     // Security: Validate and sanitize token values
-    const inputTokens = safeParseInt(usage.input_tokens);
-    const cacheReadTokens = safeParseInt(usage.cache_read_input_tokens || 0);
-    const cacheCreationTokens = safeParseInt(usage.cache_creation_input_tokens || 0);
+    const inputTokens = parseInt(usage.input_tokens);
+    const cacheReadTokens = parseInt(usage.cache_read_input_tokens || 0);
+    const cacheCreationTokens = parseInt(usage.cache_creation_input_tokens || 0);
 
     const total = inputTokens + cacheReadTokens + cacheCreationTokens;
 
@@ -110,51 +110,6 @@ function formatStatusLine(tokens, modelName) {
 
 function formatErrorStatusLine() {
   return '- (-)';
-}
-
-// Security helper functions
-function sanitizePath(inputPath) {
-  if (!inputPath || typeof inputPath !== 'string') {
-    return '';
-  }
-
-  // Remove null bytes and other control characters
-  // eslint-disable-next-line no-control-regex
-  const cleanPath = inputPath.replace(/[\x00-\x1F\x7F]/g, '');
-
-  // Basic path traversal protection - reject obvious attempts
-  if (cleanPath.includes('../') ||
-      cleanPath.includes('..\\') ||
-      cleanPath.startsWith('/etc/') ||
-      cleanPath.startsWith('/root/') ||
-      cleanPath.includes('passwd') ||
-      cleanPath.includes('shadow') ||
-      /^[A-Z]:\\(Windows|System32|Program Files)/i.test(cleanPath)) {
-
-    // Log security attempt but don't expose details
-    console.error('[SECURITY] Rejected suspicious path pattern');
-    return '';
-  }
-
-  return cleanPath;
-}
-
-function safeParseInt(value) {
-  if (typeof value === 'number') {
-    if (isFinite(value) && value >= 0 && value <= Number.MAX_SAFE_INTEGER) {
-      return Math.floor(value);
-    }
-    return 0;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = parseInt(value, 10);
-    if (isFinite(parsed) && parsed >= 0 && parsed <= Number.MAX_SAFE_INTEGER) {
-      return parsed;
-    }
-  }
-
-  return 0;
 }
 
 // Export the main API
